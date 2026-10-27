@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NHONAI - ERD - rê chuột để xem giải thích cột</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  html,body{height:100%;margin:0}
+  body{font-family:Segoe UI,Arial,sans-serif;background:#eef2f6;overflow:hidden}
+  #bar{position:fixed;top:0;left:0;right:0;z-index:1200;display:flex;gap:8px;align-items:center;
+       padding:7px 12px;background:#1f3b57;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.25);flex-wrap:wrap}
+  #bar .ttl{font-weight:700;font-size:14px;margin-right:10px}
+  #zoomv{font-size:13px;min-width:52px;text-align:center;opacity:.9}
+  #stage{position:absolute;top:0;left:0;right:0;bottom:0;overflow:hidden;cursor:grab}
+  #stage.drag{cursor:grabbing}
+  #inner{position:absolute;top:56px;left:16px;transform-origin:0 0}
+  #inner svg{display:block;max:none!important;height:auto}
+  .mermaid svg text{cursor:help}
+  #tip{position:fixed;z-index:2000;display:none;max-width:380px;pointer-events:none;
+       background:rgba(18,26,36,.88);color:#fff;border:1px solid rgba(255,255,255,.25);
+       border-radius:10px;padding:10px 13px;box-shadow:0 10px 30px rgba(0,0,0,.45);
+       backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);font-size:13px;line-height:1.45}
+  #tip .col-name{font-weight:700;font-size:14px;color:#8fd0ff;word-break:break-word}
+  #tip .sub{font-size:11px;opacity:.75;margin-bottom:4px;word-break:break-word}
+  #tip .badge{margin-right:4px;vertical-align:middle}
+  .hint{font-size:12px;opacity:.85;margin-left:auto}
+</style>
+</head>
+<body>
+<div id="bar" class="shadow-sm">
+  <span class="ttl">ERD NHONAI</span>
+  <button id="minus" class="btn btn-sm btn-outline-light">&#8722;</button>
+  <span id="zoomv">160%</span>
+  <button id="plus" class="btn btn-sm btn-outline-light">+</button>
+  <button id="reset" class="btn btn-sm btn-outline-light">Mặc định</button>
+  <button id="fit" class="btn btn-sm btn-outline-light">Vừa màn hình</button>
+  <span class="hint">Lăn chuột = zoom &nbsp;|&nbsp; Kéo chuột = di chuyển &nbsp;|&nbsp; Rê chuột lên cột / bảng để xem giải thích</span>
+</div>
+<div id="stage">
+  <div id="inner"><pre class="mermaid" id="mmd"></pre></div>
+</div>
+<div id="tip"></div>
+
+<script>
+const SCHEMA = `Address|FieldWorker_ID||int
+Address|Address_ID|PK|int
+Address|Address_Name||nvarchar
+Address|Levels||char
+Address|Parent||varchar
+Address|Region_ID|PK|varchar
+Address|Notes||nvarchar
+Address|Full_Address||nvarchar
+Address|Export_Status||bit
+Address|USER_ID||int
+Address|AddressID_Old||int
+Address|Date_Update||datetime
+Cause|Cause_Code|PK|varchar
+Cause|Cause_Name||nvarchar
+Cause|CauseCode_Old||varchar
+Change|Change_ID|PK|int
+Change|Change_Date||datetime
+Change|Source||varchar
+Change|Destination||varchar
+Change|Status||nvarchar
+Change|ChangeType_Code||varchar
+Change|Personal_ID||int
+Change|Notes||varchar
+Change|Region_ID|PK|varchar
+Change|Date_Update||datetime
+Change|User_ID||int
+Change|Export_Status||bit
+Change|Die_date||datetime
+Change|Go_date||datetime
+Change|Come_date||datetime
+ChangeType|ChangeType_Code|PK|varchar
+ChangeType|ChangeType_Name||nvarchar
+ChangeType|IsShow||int
+ChangeType|ChangeCode_Old||varchar
+ChotSo|Region_ID|PK|varchar
+ChotSo|p1||float
+ChotSo|p2||float
+ChotSo|p3||float
+ChotSo|p4||float
+ChotSo|p5||float
+ChotSo|p6||float
+ChotSo|p7||float
+ChotSo|p8||float
+ChotSo|p9||float
+ChotSo|p10||float
+ChotSo|p11||float
+ChotSo|p12||float
+ChotSo|p13||float
+ChotSo|p14||float
+ChotSo|p15||float
+ChotSo|p16||float
+ChotSo|p17||float
+ChotSo|p18||float
+ChotSo|p19||float
+ChotSo|p20||float
+ChotSo|p21||float
+ChotSo|p22||float
+ChotSo|p23||float
+ChotSo|p24||float
+ChotSo|p25||float
+ChotSo|p26||float
+ChotSo|p27||float
+ChotSo|p28||float
+ChotSo|p29||float
+ChotSo|p30||float
+ChotSo|p31||float
+ChotSo|p32||float
+ChotSo|p33||float
+ChotSo|p34||float
+ChotSo|p35||float
+ChotSo|p36||float
+ChotSo|p37||float
+ChotSo|p38||float
+ChotSo|p39||float
+ChotSo|p40||float
+ChotSo|p41||float
+ChotSo|p42||float
+ChotSo|p43||float
+ChotSo|p44||float
+ChotSo|p45||float
+ChotSo|p46||float
+ChotSo|p47||float
+ChotSo|p48||float
+ChotSo|p49||float
+ChotSo|p50||float
+ChotSo|p51||float
+ChotSo|p52||float
+ChotSo|p53||float
+ChotSo|p54||float
+ChotSo|p55||float
+ChotSo|p56||float
+ChotSo|p57||float
+ChotSo|p58||float
+ChotSo|p59||float
+ChotSo|p60||float
+ChotSo|p61||float
+ChotSo|p62||float
+ChotSo|p63||float
+ChotSo|p64||float
+ChotSo|p65||float
+ChotSo|p66||float
+ChotSo|p67||float
+ChotSo|p68||float
+ChotSo|p69||float
+ChotSo|p70||float
+ChotSo|p71||float
+ChotSo|p72||float
+ChotSo|p73||float
+ChotSo|p74||float
+ChotSo|p75||float
+ChotSo|p76||float
+ContraceptiveMethod|Contraceptive_Code|PK|varchar
+ContraceptiveMethod|Contraceptive_Name||nvarchar
+ContraceptiveMethod|ContraCode_Old||varchar
+Education|Education_Code|PK|varchar
+Education|Education_Name||nvarchar
+Education|ID||int
+Education|EducationCode_Old||varchar
+Ethnic|Ethnic_Code|PK|varchar
+Ethnic|Ethnic_Name||nvarchar
+Ethnic|Note||nvarchar
+Ethnic|EthnicCode_Old||varchar
+FamilyPlanning|Personal_ID|PK|int
+FamilyPlanning|Contra_Date||varchar
+FamilyPlanning|Contraceptive_Code||varchar
+FamilyPlanning|Export_Status||bit
+FamilyPlanning|Region_ID|PK|varchar
+FamilyPlanning|Date_Update||datetime
+FamilyPlanning|User_ID||int
+FamilyPlanningHistory|FPHistory_ID|PK|int
+FamilyPlanningHistory|Contra_Date||varchar
+FamilyPlanningHistory|Contraceptive_Code||varchar
+FamilyPlanningHistory|Export_Status||bit
+FamilyPlanningHistory|Region_ID|PK|varchar
+FamilyPlanningHistory|Personal_ID||int
+FamilyPlanningHistory|User_ID||int
+FamilyPlanningHistory|Date_Update||datetime
+FieldWorker|FieldWorker_ID|PK|int
+FieldWorker|First_Name||nvarchar
+FieldWorker|Last_Name||nvarchar
+FieldWorker|Hire_Date||datetime
+FieldWorker|Region_ID|PK|varchar
+FieldWorker|Sex_ID||char
+FieldWorker|IsCadre||bit
+FieldWorker|Export_Status||bit
+FieldWorker|USER_ID||int
+FieldWorker|Date_Update||datetime
+GenerateHealth|Generate_ID|PK|int
+GenerateHealth|Generate_Code||int
+GenerateHealth|Gen_Date||datetime
+GenerateHealth|Export_Status||bit
+GenerateHealth|Birth_Number||int
+GenerateHealth|Weight1||int
+GenerateHealth|Weight2||int
+GenerateHealth|Weight3||int
+GenerateHealth|Weight4||int
+GenerateHealth|PlaceOfBirth||varchar
+GenerateHealth|Pregnant_Check_Number||int
+GenerateHealth|Pregnant_Abort_No_Use||bit
+GenerateHealth|Region_ID|PK|varchar
+GenerateHealth|Personal_ID||int
+GenerateHealth|User_ID||int
+GenerateHealth|Date_Update||datetime
+GenerateHealth|CreatedDate||datetime
+GenerateHealth|Deliver||varchar
+GenerateHealth|Date_SLSS||datetime
+GenerateHealth|Result_SLSS||varchar
+GenerateHealth|Date_SLTS1||datetime
+GenerateHealth|Result_SLTS1||varchar
+GenerateHealth|Date_SLTS2||datetime
+GenerateHealth|Result_SLTS2||varchar
+GenerateHealth|IsTracking||bit
+GenerateHealth|IsTracking_SLTS1||bit
+GenerateHealth|IsTracking_SLTS2||bit
+HouseHold|HouseHold_ID|PK|int
+HouseHold|HouseHold_Code||varchar
+HouseHold|Address_ID||int
+HouseHold|Region_ID|PK|varchar
+HouseHold|HouseHold_Number||nvarchar
+HouseHold|Export_Status||bit
+HouseHold|USER_ID||int
+HouseHold|HouseHoldID_Old||varchar
+HouseHold|Start_Date||datetime
+HouseHold|End_Date||datetime
+HouseHold|IsBigHouseHold||bit
+HouseHold|Notes||nvarchar
+HouseHold|HouseHold_Status||char
+HouseHold|IsChecked||bit
+Invalid|Invalid_Code|PK|varchar
+Invalid|Invalid_Name||nvarchar
+Invalid|InvalidCode_Old||varchar
+MaritalStatus|Marital_Code|PK|varchar
+MaritalStatus|Marital_Name||nvarchar
+MaritalStatus|MaritalCode_Old||varchar
+MESSAGE|MESSAGE_ID|PK|nvarchar
+MESSAGE|DESCRIPTION||nvarchar
+MIS_ImportBatch|BatchId|PK|uniqueidentifier
+MIS_ImportBatch|ImportedAt||datetime2
+MIS_ImportBatch|FileName||nvarchar
+MIS_ImportBatch|SheetName||nvarchar
+MIS_ImportBatch|ImportedBy||nvarchar
+MIS_ImportBatch|InputCount||int
+MIS_ImportBatch|InsertedCount||int
+MIS_ImportBatch|SkippedCount||int
+MIS_ImportBatch|ErrorCount||int
+MIS_ImportBatch|UpdatedCount||int
+Nationality|Nationality_Code|PK|char
+Nationality|Nationality_Name||nvarchar
+Nationality|Country_Name||nvarchar
+Nationality|NationalityCode_Old||varchar
+OperationStatisticInfor|Report_ID||int
+OperationStatisticInfor|Region_ID||varchar
+OperationStatisticInfor|RptQuarter||smallint
+OperationStatisticInfor|RptYear||smallint
+OperationStatisticInfor|RptMonth||smallint
+OperationStatisticInfor|Total_Propagate_Number||int
+OperationStatisticInfor|Total_Pano_Number||int
+OperationStatisticInfor|Total_Brochure_Number||int
+OperationStatisticInfor|Total_Book_Number||int
+OperationStatisticInfor|Total_Cattsette_Number||int
+OperationStatisticInfor|Two_Children_Pair||int
+OperationStatisticInfor|MoreThanThreeChildren_Pair||int
+OperationStatisticInfor|District_Cadre||int
+OperationStatisticInfor|Female_District_Cadre||int
+OperationStatisticInfor|Export_Status||bit
+OperationStatisticInfor|Contract_District_Cadre||int
+OperationStatisticInfor|Fieldworker_Cadre||int
+OperationStatisticInfor|Female_Fieldworker1||int
+OperationStatisticInfor|Money_ChildProtection||float
+OperationStatisticInfor|Expense_Carrer_Commnue||float
+OperationStatisticInfor|Expense_Carrer_District||float
+OperationStatisticInfor|Cadre_Province||float
+OperationStatisticInfor|Expense_Carrer_Superior||float
+OperationStatisticInfor|Spend_Population||float
+OperationStatisticInfor|Spend_Child||float
+OperationStatisticInfor|Spend_Family||float
+OperationStatisticInfor|Spend_Another||float
+OperationStatisticInfor|Expense_SN||float
+OperationStatisticInfor|Expense_SN_Commune||float
+OperationStatisticInfor|Expense_Contruct||float
+OperationStatisticInfor|XBS01||int
+OperationStatisticInfor|XBS02||int
+OperationStatisticInfor|XBS03||int
+OperationStatisticInfor|XBS04||int
+OperationStatisticInfor|XBS05||int
+OperationStatisticInfor|XBS06||int
+OperationStatisticInfor|XBS07||int
+OperationStatisticInfor|XBS08||int
+OperationStatisticInfor|XBS09||int
+OperationStatisticInfor|XBS10||int
+OperationStatisticInfor|XBS11||int
+OperationStatisticInfor|XBS12||int
+OperationStatisticInfor|XBS13||int
+OperationStatisticInfor|XBS14||int
+OperationStatisticInfor|XBS15||int
+OperationStatisticInfor|XBS16||int
+OperationStatisticInfor|XBS17||int
+OperationStatisticInfor|XBS18||int
+OperationStatisticInfor|XBS19||int
+OperationStatisticInfor|XBS20||int
+OperationStatisticInfor|XBS21||int
+OperationStatisticInfor|XBS22||int
+OperationStatisticInfor|XBS23||int
+OperationStatisticInfor|XBS24||float
+OperationStatisticInfor|XBS25||float
+OperationStatisticInfor|XBS26||float
+OperationStatisticInfor|XBS27||float
+OperationStatisticInfor|XBS28||float
+OperationStatisticInfor|HBS01||int
+OperationStatisticInfor|HBS02||int
+OperationStatisticInfor|HBS03||int
+OperationStatisticInfor|HBS04||int
+OperationStatisticInfor|HBS05||int
+OperationStatisticInfor|HBS06||int
+OperationStatisticInfor|HBS07||int
+OperationStatisticInfor|HBS08||int
+OperationStatisticInfor|HBS09||int
+OperationStatisticInfor|HBS10||int
+OperationStatisticInfor|HBS11||int
+OperationStatisticInfor|HBS12||int
+OperationStatisticInfor|HBS13||int
+OperationStatisticInfor|HBS14||int
+OperationStatisticInfor|HBS15||float
+OperationStatisticInfor|HBS16||float
+OperationStatisticInfor|HBS17||float
+OperationStatisticInfor|HBS18||float
+OperationStatisticInfor|HBS19||float
+OperationStatisticInfor|TBS01||int
+OperationStatisticInfor|TBS02||float
+OperationStatisticInfor|TBS03||float
+OperationStatisticInfor|TBS04||float
+OperationStatisticInfor|TBS05||float
+OperationStatisticInfor|TBS06||float
+OperationStatisticInfor|TBS07||float
+OperationStatisticInfor|TBS08||float
+OperationStatisticInfor|TBS09||int
+OperationStatisticInfor|TBS10||int
+OperationStatisticInfor|TBS11||int
+OperationStatisticInfor|TBS12||int
+Personal|Personal_ID|PK|int
+Personal|First_Name||nvarchar
+Personal|Last_Name||nvarchar
+Personal|DateOfBirth||varchar
+Personal|PlaceOfBirth||varchar
+Personal|Nationality_Code||char
+Personal|Relation_Code||varchar
+Personal|Ethnic_Code||varchar
+Personal|Residence_Code||varchar
+Personal|Education_Code||varchar
+Personal|Technical_Code||varchar
+Personal|Marital_Code||varchar
+Personal|Sex_ID||char
+Personal|Region_ID|PK|varchar
+Personal|HouseHold_ID||int
+Personal|Person_Status||nvarchar
+Personal|Education_Level||nvarchar
+Personal|USER_ID||int
+Personal|Invalid_Code||varchar
+Personal|Export_Status||bit
+Personal|Change_Date||datetime
+Personal|Start_Date||datetime
+Personal|End_Date||datetime
+Personal|Notes||nvarchar
+Personal|Mother_ID||int
+Personal|Birth_Number||tinyint
+Personal|Generate_ID||int
+Personal|Cccd_Bhyt_Code||nvarchar
+Personal|inbreeding||bit
+Personal|CCCD_Old||nvarchar
+Personal|CCCD_Mapped||bit
+Personal_CccdMapLog|Id|PK|bigint
+Personal_CccdMapLog|BatchId||uniqueidentifier
+Personal_CccdMapLog|TempId||bigint
+Personal_CccdMapLog|PersonalTable||nvarchar
+Personal_CccdMapLog|PersonalKey||nvarchar
+Personal_CccdMapLog|OldCccd||nvarchar
+Personal_CccdMapLog|NewCccd||nvarchar
+Personal_CccdMapLog|ChangedAt||datetime2
+Personal_CccdMapLog|ChangedBy||nvarchar
+Personal_CccdMapLog|OldBhyt||nvarchar
+Personal_CccdMapLog|NewBhyt||nvarchar
+Personal_CccdMapLog|CccdChanged||bit
+Personal_CccdMapLog|BhytChanged||bit
+Personal_CccdMapLog|DetailsJson||nvarchar
+Personal_Temp|Id|PK|bigint
+Personal_Temp|CCCD||varchar
+Personal_Temp|HoTen||nvarchar
+Personal_Temp|NgaySinh||date
+Personal_Temp|GioiTinh||tinyint
+Personal_Temp|MaXa||varchar
+Personal_Temp|CreatedAt||datetime2
+Personal_Temp|CCCD_Mapped||bit
+Personal_Temp|DiaChi||nvarchar
+Personal_Temp|ImportRevision||bigint
+Region|Region_ID|PK|varchar
+Region|Region_Name||nvarchar
+Region|Parent||varchar
+Region|Area||char
+Region|Levels||char
+Region|Active||char
+Region|Selected||char
+Region|RegionID_Old||varchar
+Region|ID||bigint
+RegionChange|ID||int
+RegionChange|ChangeDate||nvarchar
+RegionChange|Region_ID||varchar
+RegionChange|Region_Name||nvarchar
+RegionChange|Region_Old||varchar
+RegionChange|Parent||varchar
+RegionChange|ChangeType||char
+RegionChange|ChangeDesc||nvarchar
+RegionChange|Status||char
+RegionChangeType|ChangeType_Code||char
+RegionChangeType|ChangeType_Desc||nvarchar
+RegionOld|ID||decimal
+RegionOld|Region_ID||varchar
+RegionOld|Region_Name||nvarchar
+RegionOld|Parent||varchar
+RegionOld|Area||varchar
+RegionOld|Levels||char
+RegionOld|Active||char
+RegionOld|Selected||char
+Relation|Relation_Code|PK|varchar
+Relation|Relation_Name||nvarchar
+Relation|RelationCode_Old||varchar
+Report|RC_ID||varchar
+Report|RC_NAME||nvarchar
+Report|LEVELS||varchar
+Report|RPT_NAME||varchar
+Report|RC_TYPE||char
+Report|PROC_NAME||varchar
+Report|PARAS||varchar
+Report|SHOW_MONTH||char
+Report|SHOW_QUARTER||char
+Report|SHOW_YEAR||char
+Report|SHOW_FROMDATE||char
+Report|SHOW_TODATE||char
+ReportDesign|RC_ID||varchar
+ReportDesign|HEADER_L||nvarchar
+ReportDesign|HEADER_R||nvarchar
+ReportDesign|SUBTITLE||nvarchar
+ReportDesign|CAPTION1||nvarchar
+ReportDesign|CAPTION2||nvarchar
+ReportDesign|CAPTION3||nvarchar
+ReportDesign|FOOTER_L||nvarchar
+ReportDesign|FOOTER_R||nvarchar
+ReportDesign|SHOW_FOOTER||char
+ResidenceStatus|Residence_Code|PK|varchar
+ResidenceStatus|Residence_Name||nvarchar
+ResidenceStatus|ResidenceCode_Old||varchar
+Sex|Sex_ID|PK|char
+Sex|Sex_Name||nvarchar
+Sex|ID||int
+SupplementInfor|Report_ID||int
+SupplementInfor|Region_ID||varchar
+SupplementInfor|KHHGD_Service_Base_Number||int
+SupplementInfor|Commune_Medical_Station||int
+SupplementInfor|Private_Medical_Base||int
+SupplementInfor|Province_Hospital||int
+SupplementInfor|District_Hospital||int
+SupplementInfor|Area_Hospital||int
+SupplementInfor|Social_Branch_Base||int
+SupplementInfor|Branch_Hospital||int
+SupplementInfor|Centre_Hospital||int
+SupplementInfor|Province_Cadre||int
+SupplementInfor|Female_Province_Cadre||int
+SupplementInfor|Contract_Province_Cadre||int
+SupplementInfor|District_Cadre||int
+SupplementInfor|Female_District_Cadre||int
+SupplementInfor|Contract_District_Cadre||int
+SupplementInfor|Commune_Cadre||int
+SupplementInfor|Contract_Commune_Cadre||float
+SupplementInfor|Female_Commune_Cadre||int
+SupplementInfor|Implement_Investment||float
+SupplementInfor|Investment_District||float
+SupplementInfor|Investment_Province||float
+SupplementInfor|Investment_Centre||float
+SupplementInfor|Investment_Upper||float
+SupplementInfor|Expenses_Allocation||float
+SupplementInfor|Expenses_Commune||float
+SupplementInfor|Expenses_District||float
+SupplementInfor|Expenses_Province||float
+SupplementInfor|Expenses_Centre||float
+SupplementInfor|Expenses_Upper||float
+SupplementInfor|RptYear||int
+SupplementInfor|Investment_Commune||float
+SupplementInfor|Export_Status||bit
+SupplementInfor|House_Poor||int
+SupplementInfor|House_Culture||int
+SupplementInfor|House_Law||int
+SupplementInfor|Total_Abuse||int
+SupplementInfor|Total_Abuse_Settle||int
+SupplementInfor|Total_Abuse_Child||int
+SupplementInfor|Baby_Sale||int
+SupplementInfor|Baby_Sale_Female||int
+SupplementInfor|Baby_Inject||int
+SupplementInfor|Baby_Underfed||int
+SupplementInfor|Baby_HIV||int
+SupplementInfor|Baby_FarHome||int
+SupplementInfor|Baby_InjureSex||int
+SupplementInfor|Commune_ChildProtection||int
+SupplementInfor|Commune_ChildStand||int
+SupplementInfor|Money_ChildProtection||float
+SupplementInfor|SourceOfCapital_ODA||float
+Sys_AccessLogs|LOG_ID|PK|int
+Sys_AccessLogs|ACC_TIME||datetime
+Sys_AccessLogs|SERVER_NAME||nvarchar
+Sys_AccessLogs|SYSDB_NAME||nvarchar
+Sys_AccessLogs|USER_ID||int
+Sys_AccessLogs|ACTION_ID||varchar
+Sys_AccessLogs|NOTES||nvarchar
+Sys_AccessRights|ACCESS_ID|PK|int
+Sys_AccessRights|FUNC_ID||varchar
+Sys_AccessRights|VIEW||bit
+Sys_AccessRights|UPDATE||bit
+Sys_AccessRights|DELETE||bit
+Sys_AccessRights|INSERT||bit
+Sys_AccessRights|ACCEPT||bit
+Sys_AccessRights|ROLE_ID||int
+Sys_AccessRights|ROLE_TYPE||varchar
+Sys_Actions|ACTION_ID|PK|varchar
+Sys_Actions|ACTION_NAME||nvarchar
+Sys_Functions|FUNC_NAME||nvarchar
+Sys_Functions|MODULE_ID||varchar
+Sys_Functions|FUNC_TYPE||char
+Sys_Functions|FUNC_ID|PK|varchar
+Sys_Groups|GROUP_ID|PK|int
+Sys_Groups|GROUP_NAME||nvarchar
+Sys_Groups|GROUP_DESC||nvarchar
+Sys_Groups|SELECTED||bit
+Sys_Modules|MODULE_NAME||nvarchar
+Sys_Modules|MODULE_ID|PK|varchar
+Sys_SysParas|ID||smallint
+Sys_SysParas|Para_Name||nvarchar
+Sys_SysParas|Para_Value||nvarchar
+Sys_SysParas|ParaName_Desc||nvarchar
+Sys_SysParas|ParaValue_Desc||nvarchar
+Sys_SysParas|IsShow||char
+Sys_Users|USER_ID|PK|int
+Sys_Users|USER_NAME||nvarchar
+Sys_Users|FULL_NAME||nvarchar
+Sys_Users|PASSWORD||binary
+Sys_Users|GROUP_ID||int
+sysdiagrams|name||sysname
+sysdiagrams|principal_id||int
+sysdiagrams|diagram_id|PK|int
+sysdiagrams|version||int
+sysdiagrams|definition||varbinary
+Technical|Technical_Code|PK|varchar
+Technical|Technical_Name||nvarchar
+Technical|ID||int
+Technical|TechnicalCode_Old||varchar
+Tmp_Address|FieldWorker_ID||int
+Tmp_Address|Address_ID||int
+Tmp_Address|Address_Name||nvarchar
+Tmp_Address|Levels||char
+Tmp_Address|Parent||varchar
+Tmp_Address|Region_ID||varchar
+Tmp_Address|Notes||nvarchar
+Tmp_Address|Full_Address||nvarchar
+Tmp_Address|Export_Status||bit
+Tmp_Address|USER_ID||int
+Tmp_Address|AddressID_Old||int
+Tmp_Address|Date_Update||datetime
+Tmp_Cause|Cause_Code||varchar
+Tmp_Cause|Cause_Name||nvarchar
+Tmp_Cause|CauseCode_Old||varchar
+Tmp_Change|Change_ID||int
+Tmp_Change|Change_Date||datetime
+Tmp_Change|Source||varchar
+Tmp_Change|Destination||varchar
+Tmp_Change|Status||nvarchar
+Tmp_Change|ChangeType_Code||varchar
+Tmp_Change|Personal_ID||int
+Tmp_Change|Notes||varchar
+Tmp_Change|Region_ID||varchar
+Tmp_Change|Date_Update||datetime
+Tmp_Change|User_ID||int
+Tmp_Change|Export_Status||bit
+Tmp_Change|Die_date||datetime
+Tmp_Change|Go_date||datetime
+Tmp_Change|Come_date||datetime
+Tmp_Children|Personal_ID||int
+Tmp_Children|Personal_Code||char
+Tmp_Children|Export_Status||bit
+Tmp_Children|Region_ID||varchar
+Tmp_Children|CapTKCB||bit
+Tmp_Children|DaKS||bit
+Tmp_FamilyPlanning|Personal_ID||int
+Tmp_FamilyPlanning|Contra_Date||varchar
+Tmp_FamilyPlanning|Contraceptive_Code||varchar
+Tmp_FamilyPlanning|Export_Status||bit
+Tmp_FamilyPlanning|Region_ID||varchar
+Tmp_FamilyPlanning|Date_Update||datetime
+Tmp_FamilyPlanning|User_ID||int
+Tmp_FamilyPlanningHistory|FPHistory_ID||int
+Tmp_FamilyPlanningHistory|Contra_Date||varchar
+Tmp_FamilyPlanningHistory|Contraceptive_Code||varchar
+Tmp_FamilyPlanningHistory|Export_Status||bit
+Tmp_FamilyPlanningHistory|Region_ID||varchar
+Tmp_FamilyPlanningHistory|Personal_ID||int
+Tmp_FamilyPlanningHistory|User_ID||int
+Tmp_FamilyPlanningHistory|Date_Update||datetime
+Tmp_FieldWorker|FieldWorker_ID||int
+Tmp_FieldWorker|First_Name||nvarchar
+Tmp_FieldWorker|Last_Name||nvarchar
+Tmp_FieldWorker|Hire_Date||datetime
+Tmp_FieldWorker|Region_ID||varchar
+Tmp_FieldWorker|Sex_ID||char
+Tmp_FieldWorker|IsCadre||bit
+Tmp_FieldWorker|Export_Status||bit
+Tmp_FieldWorker|USER_ID||int
+Tmp_FieldWorker|Date_Update||datetime
+Tmp_GenerateHealth|Generate_ID||int
+Tmp_GenerateHealth|Generate_Code||int
+Tmp_GenerateHealth|Gen_Date||datetime
+Tmp_GenerateHealth|Export_Status||bit
+Tmp_GenerateHealth|Birth_Number||int
+Tmp_GenerateHealth|Weight1||int
+Tmp_GenerateHealth|Weight2||int
+Tmp_GenerateHealth|Weight3||int
+Tmp_GenerateHealth|Weight4||int
+Tmp_GenerateHealth|PlaceOfBirth||varchar
+Tmp_GenerateHealth|Pregnant_Check_Number||int
+Tmp_GenerateHealth|Pregnant_Abort_No_Use||bit
+Tmp_GenerateHealth|Region_ID||varchar
+Tmp_GenerateHealth|Personal_ID||int
+Tmp_GenerateHealth|User_ID||int
+Tmp_GenerateHealth|Date_Update||datetime
+Tmp_GenerateHealth|CreatedDate||datetime
+Tmp_GenerateHealth|Deliver||varchar
+Tmp_GenerateHealth|Date_SLSS||datetime
+Tmp_GenerateHealth|Result_SLSS||varchar
+Tmp_GenerateHealth|Date_SLTS1||datetime
+Tmp_GenerateHealth|Result_SLTS1||varchar
+Tmp_GenerateHealth|Date_SLTS2||datetime
+Tmp_GenerateHealth|Result_SLTS2||varchar
+Tmp_GenerateHealth|IsTracking||bit
+Tmp_GenerateHealth|IsTracking_SLTS1||bit
+Tmp_GenerateHealth|IsTracking_SLTS2||bit
+Tmp_HH|HouseHold_ID||varchar
+Tmp_HouseHold|HouseHold_ID||int
+Tmp_HouseHold|HouseHold_Code||varchar
+Tmp_HouseHold|Address_ID||int
+Tmp_HouseHold|Region_ID||varchar
+Tmp_HouseHold|HouseHold_Number||nvarchar
+Tmp_HouseHold|Export_Status||bit
+Tmp_HouseHold|USER_ID||int
+Tmp_HouseHold|HouseHoldID_Old||int
+Tmp_HouseHold|Start_Date||datetime
+Tmp_HouseHold|End_Date||datetime
+Tmp_HouseHold|IsBigHouseHold||bit
+Tmp_HouseHold|Notes||nvarchar
+Tmp_HouseHold|HouseHold_Status||char
+Tmp_HouseHold|IsChecked||bit
+Tmp_OperationStatisticInfor|Report_ID||int
+Tmp_OperationStatisticInfor|Region_ID||varchar
+Tmp_OperationStatisticInfor|RptQuarter||smallint
+Tmp_OperationStatisticInfor|RptYear||smallint
+Tmp_OperationStatisticInfor|RptMonth||smallint
+Tmp_OperationStatisticInfor|Total_Propagate_Number||int
+Tmp_OperationStatisticInfor|Total_Pano_Number||int
+Tmp_OperationStatisticInfor|Total_Brochure_Number||int
+Tmp_OperationStatisticInfor|Total_Book_Number||int
+Tmp_OperationStatisticInfor|Total_Cattsette_Number||int
+Tmp_OperationStatisticInfor|Two_Children_Pair||int
+Tmp_OperationStatisticInfor|MoreThanThreeChildren_Pair||int
+Tmp_OperationStatisticInfor|District_Cadre||int
+Tmp_OperationStatisticInfor|Female_District_Cadre||int
+Tmp_OperationStatisticInfor|Export_Status||bit
+Tmp_OperationStatisticInfor|Contract_District_Cadre||int
+Tmp_OperationStatisticInfor|Fieldworker_Cadre||int
+Tmp_OperationStatisticInfor|Female_Fieldworker1||int
+Tmp_OperationStatisticInfor|Money_ChildProtection||float
+Tmp_OperationStatisticInfor|Expense_Carrer_Commnue||float
+Tmp_OperationStatisticInfor|Expense_Carrer_District||float
+Tmp_OperationStatisticInfor|Cadre_Province||float
+Tmp_OperationStatisticInfor|Expense_Carrer_Superior||float
+Tmp_OperationStatisticInfor|Spend_Population||float
+Tmp_OperationStatisticInfor|Spend_Child||float
+Tmp_OperationStatisticInfor|Spend_Family||float
+Tmp_OperationStatisticInfor|Spend_Another||float
+Tmp_OperationStatisticInfor|Expense_SN||float
+Tmp_OperationStatisticInfor|Expense_SN_Commune||float
+Tmp_OperationStatisticInfor|Expense_Contruct||float
+Tmp_OperationStatisticInfor|XBS01||int
+Tmp_OperationStatisticInfor|XBS02||int
+Tmp_OperationStatisticInfor|XBS03||int
+Tmp_OperationStatisticInfor|XBS04||int
+Tmp_OperationStatisticInfor|XBS05||int
+Tmp_OperationStatisticInfor|XBS06||int
+Tmp_OperationStatisticInfor|XBS07||int
+Tmp_OperationStatisticInfor|XBS08||int
+Tmp_OperationStatisticInfor|XBS09||int
+Tmp_OperationStatisticInfor|XBS10||int
+Tmp_OperationStatisticInfor|XBS11||int
+Tmp_OperationStatisticInfor|XBS12||int
+Tmp_OperationStatisticInfor|XBS13||int
+Tmp_OperationStatisticInfor|XBS14||int
+Tmp_OperationStatisticInfor|XBS15||int
+Tmp_OperationStatisticInfor|XBS16||int
+Tmp_OperationStatisticInfor|XBS17||int
+Tmp_OperationStatisticInfor|XBS18||int
+Tmp_OperationStatisticInfor|XBS19||int
+Tmp_OperationStatisticInfor|XBS20||int
+Tmp_OperationStatisticInfor|XBS21||int
+Tmp_OperationStatisticInfor|XBS22||int
+Tmp_OperationStatisticInfor|XBS23||int
+Tmp_OperationStatisticInfor|XBS24||float
+Tmp_OperationStatisticInfor|XBS25||float
+Tmp_OperationStatisticInfor|XBS26||float
+Tmp_OperationStatisticInfor|XBS27||float
+Tmp_OperationStatisticInfor|XBS28||float
+Tmp_OperationStatisticInfor|HBS01||int
+Tmp_OperationStatisticInfor|HBS02||int
+Tmp_OperationStatisticInfor|HBS03||int
+Tmp_OperationStatisticInfor|HBS04||int
+Tmp_OperationStatisticInfor|HBS05||int
+Tmp_OperationStatisticInfor|HBS06||int
+Tmp_OperationStatisticInfor|HBS07||int
+Tmp_OperationStatisticInfor|HBS08||int
+Tmp_OperationStatisticInfor|HBS09||int
+Tmp_OperationStatisticInfor|HBS10||int
+Tmp_OperationStatisticInfor|HBS11||int
+Tmp_OperationStatisticInfor|HBS12||int
+Tmp_OperationStatisticInfor|HBS13||int
+Tmp_OperationStatisticInfor|HBS14||int
+Tmp_OperationStatisticInfor|HBS15||float
+Tmp_OperationStatisticInfor|HBS16||float
+Tmp_OperationStatisticInfor|HBS17||float
+Tmp_OperationStatisticInfor|HBS18||float
+Tmp_OperationStatisticInfor|HBS19||float
+Tmp_OperationStatisticInfor|TBS01||float
+Tmp_OperationStatisticInfor|TBS02||float
+Tmp_OperationStatisticInfor|TBS03||float
+Tmp_OperationStatisticInfor|TBS04||float
+Tmp_OperationStatisticInfor|TBS05||float
+Tmp_OperationStatisticInfor|TBS06||float
+Tmp_OperationStatisticInfor|TBS07||float
+Tmp_OperationStatisticInfor|TBS08||float
+Tmp_OperationStatisticInfor|TBS09||float
+Tmp_OperationStatisticInfor|TBS10||float
+Tmp_OperationStatisticInfor|TBS11||float
+Tmp_Per|Personal_ID||int
+Tmp_Personal|Personal_ID||int
+Tmp_Personal|First_Name||nvarchar
+Tmp_Personal|Last_Name||nvarchar
+Tmp_Personal|DateOfBirth||varchar
+Tmp_Personal|PlaceOfBirth||varchar
+Tmp_Personal|Nationality_Code||char
+Tmp_Personal|Relation_Code||varchar
+Tmp_Personal|Ethnic_Code||varchar
+Tmp_Personal|Residence_Code||varchar
+Tmp_Personal|Education_Code||varchar
+Tmp_Personal|Technical_Code||varchar
+Tmp_Personal|Marital_Code||varchar
+Tmp_Personal|Sex_ID||char
+Tmp_Personal|Region_ID||varchar
+Tmp_Personal|HouseHold_ID||int
+Tmp_Personal|Person_Status||nvarchar
+Tmp_Personal|Education_Level||nvarchar
+Tmp_Personal|USER_ID||int
+Tmp_Personal|Invalid_Code||varchar
+Tmp_Personal|Export_Status||bit
+Tmp_Personal|Change_Date||datetime
+Tmp_Personal|Start_Date||datetime
+Tmp_Personal|End_Date||datetime
+Tmp_Personal|Notes||nvarchar
+Tmp_Personal|Mother_ID||int
+Tmp_Personal|Birth_Number||int
+Tmp_Personal|Generate_ID||int
+Tmp_Personal|Cccd_Bhyt_Code||nvarchar
+Tmp_Personal|inbreeding||bit
+Tmp_PersonalHistory|PersonalHistory_ID||int
+Tmp_PersonalHistory|Personal_Code||char
+Tmp_PersonalHistory|First_Name||nvarchar
+Tmp_PersonalHistory|Last_Name||nvarchar
+Tmp_PersonalHistory|DateOfBirth||varchar
+Tmp_PersonalHistory|PlaceOfBirth||varchar
+Tmp_PersonalHistory|Nationality_Code||char
+Tmp_PersonalHistory|Relation_Code||varchar
+Tmp_PersonalHistory|Ethnic_Code||varchar
+Tmp_PersonalHistory|Residence_Code||varchar
+Tmp_PersonalHistory|Education_Code||varchar
+Tmp_PersonalHistory|Technical_Code||varchar
+Tmp_PersonalHistory|Marital_Code||varchar
+Tmp_PersonalHistory|HouseHold_ID||int
+Tmp_PersonalHistory|OtherAdd||varchar
+Tmp_PersonalHistory|Region_ID||varchar
+Tmp_PersonalHistory|ChangeType_Code||varchar
+Tmp_PersonalHistory|Change_Date||datetime
+Tmp_PersonalHistory|Destination||varchar
+Tmp_PersonalHistory|Source||varchar
+Tmp_PersonalHistory|Sex_ID||char
+Tmp_PersonalHistory|Education_Level||nvarchar
+Tmp_PersonalHistory|Person_Status||nvarchar
+Tmp_PersonalHistory|Export_Status||bit
+Tmp_PersonalHistory|Invalid_Code||varchar
+Tmp_PersonalHistory|Note||varchar
+Tmp_RegionChange|ID||int
+Tmp_RegionChange|ChangeDate||nvarchar
+Tmp_RegionChange|Region_ID||varchar
+Tmp_RegionChange|Region_Name||nvarchar
+Tmp_RegionChange|Region_Old||varchar
+Tmp_RegionChange|Parent||varchar
+Tmp_RegionChange|ChangeType||char
+Tmp_RegionChange|ChangeDesc||nvarchar
+Tmp_RegionChange|Status||char
+Tmp_SupplementInfor|Report_ID||int
+Tmp_SupplementInfor|Region_ID||varchar
+Tmp_SupplementInfor|KHHGD_Service_Base_Number||int
+Tmp_SupplementInfor|Commune_Medical_Station||int
+Tmp_SupplementInfor|Private_Medical_Base||int
+Tmp_SupplementInfor|Province_Hospital||int
+Tmp_SupplementInfor|District_Hospital||int
+Tmp_SupplementInfor|Area_Hospital||int
+Tmp_SupplementInfor|Social_Branch_Base||int
+Tmp_SupplementInfor|Branch_Hospital||int
+Tmp_SupplementInfor|Centre_Hospital||int
+Tmp_SupplementInfor|Province_Cadre||int
+Tmp_SupplementInfor|Female_Province_Cadre||int
+Tmp_SupplementInfor|Contract_Province_Cadre||int
+Tmp_SupplementInfor|District_Cadre||int
+Tmp_SupplementInfor|Female_District_Cadre||int
+Tmp_SupplementInfor|Contract_District_Cadre||int
+Tmp_SupplementInfor|Commune_Cadre||int
+Tmp_SupplementInfor|Contract_Commune_Cadre||float
+Tmp_SupplementInfor|Female_Commune_Cadre||int
+Tmp_SupplementInfor|Implement_Investment||float
+Tmp_SupplementInfor|Investment_District||float
+Tmp_SupplementInfor|Investment_Province||float
+Tmp_SupplementInfor|Investment_Centre||float
+Tmp_SupplementInfor|Investment_Upper||float
+Tmp_SupplementInfor|Expenses_Allocation||float
+Tmp_SupplementInfor|Expenses_Commune||float
+Tmp_SupplementInfor|Expenses_District||float
+Tmp_SupplementInfor|Expenses_Province||float
+Tmp_SupplementInfor|Expenses_Centre||float
+Tmp_SupplementInfor|Expenses_Upper||float
+Tmp_SupplementInfor|RptYear||int
+Tmp_SupplementInfor|Investment_Commune||float
+Tmp_SupplementInfor|Export_Status||bit
+Tmp_SupplementInfor|House_Poor||int
+Tmp_SupplementInfor|House_Culture||int
+Tmp_SupplementInfor|House_Law||int
+Tmp_SupplementInfor|Total_Abuse||int
+Tmp_SupplementInfor|Total_Abuse_Settle||int
+Tmp_SupplementInfor|Total_Abuse_Child||int
+Tmp_SupplementInfor|Baby_Sale||int
+Tmp_SupplementInfor|Baby_Sale_Female||int
+Tmp_SupplementInfor|Baby_Inject||int
+Tmp_SupplementInfor|Baby_Underfed||int
+Tmp_SupplementInfor|Baby_HIV||int
+Tmp_SupplementInfor|Baby_FarHome||int
+Tmp_SupplementInfor|Baby_InjureSex||int
+Tmp_SupplementInfor|Commune_ChildProtection||int
+Tmp_SupplementInfor|Commune_ChildStand||int
+Tmp_SupplementInfor|Money_ChildProtection||float
+Tmp_SupplementInfor|SourceOfCapital_ODA||float`;
+
+const RELS = [
+  ['FamilyPlanning','Personal','Personal_ID'],
+  ['FamilyPlanningHistory','Personal','Personal_ID'],
+  ['GenerateHealth','Personal','Personal_ID'],
+  ['Change','Personal','Personal_ID'],
+  ['Personal','HouseHold','HouseHold_ID'],
+  ['HouseHold','Address','Address_ID'],
+  ['Address','FieldWorker','FieldWorker_ID'],
+  ['Personal','Region','Region_ID'],
+  ['HouseHold','Region','Region_ID'],
+  ['Address','Region','Region_ID'],
+  ['FieldWorker','Region','Region_ID'],
+  ['FamilyPlanning','Region','Region_ID'],
+  ['FamilyPlanningHistory','Region','Region_ID'],
+  ['GenerateHealth','Region','Region_ID'],
+  ['Change','Region','Region_ID'],
+  ['Personal','Sex','Sex_ID'],
+  ['FieldWorker','Sex','Sex_ID'],
+  ['Personal','Nationality','Nationality_Code'],
+  ['Personal','Relation','Relation_Code'],
+  ['Personal','Ethnic','Ethnic_Code'],
+  ['Personal','ResidenceStatus','Residence_Code'],
+  ['Personal','Education','Education_Code'],
+  ['Personal','Technical','Technical_Code'],
+  ['Personal','MaritalStatus','Marital_Code'],
+  ['Personal','Invalid','Invalid_Code'],
+  ['Change','ChangeType','ChangeType_Code'],
+  ['FamilyPlanning','ContraceptiveMethod','Contraceptive_Code'],
+  ['FamilyPlanningHistory','ContraceptiveMethod','Contraceptive_Code'],
+  ['Sys_Users','Sys_Groups','GROUP_ID'],
+  ['Sys_Functions','Sys_Modules','MODULE_ID'],
+  ['Sys_AccessRights','Sys_Functions','FUNC_ID'],
+  ['Sys_AccessLogs','Sys_Users','USER_ID'],
+  ['Sys_AccessLogs','Sys_Actions','ACTION_ID'],
+  ['Personal','Sys_Users','USER_ID'],
+  ['HouseHold','Sys_Users','USER_ID']
+];
+
+const TDESC = {
+  'Personal':'Nhân khẩu - thông tin của từng người dân.',
+  'HouseHold':'Hộ gia đình.',
+  'Address':'Địa chỉ / đơn vị hành chính (ấp, xã, huyện, tỉnh...).',
+  'FieldWorker':'Cộng tác viên / cán bộ dân số.',
+  'FamilyPlanning':'Kế hoạch hóa gia đình (hiện tại) theo từng người.',
+  'FamilyPlanningHistory':'Lịch sử kế hoạch hóa gia đình.',
+  'GenerateHealth':'Sinh đẻ & sức khỏe bà mẹ (khám thai, sinh, theo dõi).',
+  'Change':'Biến động dân số (sinh, tử, chuyển đến/đi...).',
+  'ChangeType':'Danh mục loại biến động.',
+  'Sex':'Danh mục giới tính.',
+  'Nationality':'Danh mục quốc tịch.',
+  'Relation':'Danh mục quan hệ với chủ hộ.',
+  'Ethnic':'Danh mục dân tộc.',
+  'ResidenceStatus':'Danh mục tình trạng cư trú.',
+  'Education':'Danh mục trình độ học vấn.',
+  'Technical':'Danh mục trình độ kỹ thuật / chuyên môn.',
+  'MaritalStatus':'Danh mục tình trạng hôn nhân.',
+  'Invalid':'Danh mục lý do không hợp lệ (không tính vào báo cáo).',
+  'ContraceptiveMethod':'Danh mục biện pháp tránh thai.',
+  'Cause':'Danh mục nguyên nhân biến động.',
+  'Region':'Danh mục / đơn vị vùng, tỉnh-xã, phân cấp.',
+  'RegionChange':'Lịch sử thay đổi / điều chỉnh địa bàn.',
+  'RegionChangeType':'Danh mục loại thay đổi địa bàn.',
+  'RegionOld':'Địa bàn cũ trước sáp nhập (lưu trữ).',
+  'ChotSo':'Chốt số liệu báo cáo theo kỳ (p1..p76).',
+  'SupplementInfor':'Báo cáo bổ sung (chỉ tiêu dân số, trẻ em...).',
+  'OperationStatisticInfor':'Thông tin thống kê công tác dân số theo kỳ (XBS/HBS/TBS...).',
+  'MIS_ImportBatch':'Lô nhập dữ liệu từ Excel (CCCD).',
+  'MESSAGE':'Kho thông báo / thông điệp hệ thống.',
+  'Personal_CccdMapLog':'Log lịch sử đổi CCCD/BHYT cho nhân khẩu.',
+  'Personal_Temp':'Bảng tạm nhập dữ liệu CCCD từ file.',
+  'Report':'Danh mục báo cáo và tham số.',
+  'ReportDesign':'Mẫu thiết kế báo cáo (tiêu đề, chú thích...).',
+  'Sys_AccessLogs':'Nhật ký truy cập hệ thống.',
+  'Sys_AccessRights':'Phân quyền chức năng.',
+  'Sys_Actions':'Danh mục hành động (xem/thêm/sửa/xóa).',
+  'Sys_Functions':'Danh mục chức năng hệ thống.',
+  'Sys_Groups':'Nhóm người dùng.',
+  'Sys_Modules':'Danh mục module.',
+  'Sys_SysParas':'Tham số hệ thống.',
+  'Sys_Users':'Người dùng hệ thống.'
+};
+
+const DESC = {
+  'Personal_ID':'Mã định danh nhân khẩu (khóa chính của Personal).',
+  'HouseHold_ID':'Mã hộ gia đình.',
+  'HouseHold_Code':'Mã số hộ.',
+  'HouseHold_Number':'Số nhà / số hộ.',
+  'Address_ID':'Mã địa chỉ.',
+  'Address_Name':'Tên địa chỉ / đơn vị hành chính.',
+  'FieldWorker_ID':'Mã cộng tác viên / cán bộ.',
+  'Full_Address':'Địa chỉ đầy đủ.',
+  'Region_ID':'Mã vùng / đơn vị hành chính.',
+  'Region_Name':'Tên vùng / đơn vị hành chính.',
+  'Parent':'Mã đơn vị cấp cha (quan hệ phân cấp).',
+  'Levels':'Cấp hành chính (tỉnh/huyện/xã).',
+  'Sex_ID':'Giới tính (nam/nữ).',
+  'Sex_Name':'Tên giới tính.',
+  'First_Name':'Tên (tên gọi).',
+  'Last_Name':'Họ và tên đệm.',
+  'DateOfBirth':'Ngày sinh.',
+  'PlaceOfBirth':'Nơi sinh.',
+  'Nationality_Code':'Mã quốc tịch.',
+  'Relation_Code':'Mã quan hệ với chủ hộ.',
+  'Ethnic_Code':'Mã dân tộc.',
+  'Residence_Code':'Mã tình trạng cư trú.',
+  'Education_Code':'Mã trình độ học vấn.',
+  'Technical_Code':'Mã trình độ kỹ thuật.',
+  'Marital_Code':'Mã tình trạng hôn nhân.',
+  'Person_Status':'Trạng thái nhân khẩu.',
+  'Education_Level':'Trình độ học vấn (dạng chữ).',
+  'Invalid_Code':'Mã lý do không hợp lệ.',
+  'Change_Date':'Ngày biến động / thay đổi.',
+  'Start_Date':'Ngày bắt đầu hiệu lực.',
+  'End_Date':'Ngày kết thúc hiệu lực.',
+  'Notes':'Ghi chú.',
+  'Note':'Ghi chú.',
+  'Mother_ID':'Mã nhân khẩu của mẹ.',
+  'Birth_Number':'Số lần sinh (con thứ mấy).',
+  'Generate_ID':'Mã bản ghi sinh sản / sức khỏe.',
+  'Cccd_Bhyt_Code':'Số CCCD / mã BHYT.',
+  'CCCD_Old':'Số CCCD cũ.',
+  'CCCD_Mapped':'Đã ghép / ánh xạ CCCD chưa.',
+  'inbreeding':'Có cận huyết hay không.',
+  'Export_Status':'Trạng thái xuất dữ liệu (0: chưa, 1: đã xuất).',
+  'USER_ID':'Mã người dùng (tài khoản tạo/sửa).',
+  'User_ID':'Mã người dùng (tài khoản tạo/sửa).',
+  'Date_Update':'Ngày cập nhật.',
+  'Change_ID':'Mã biến động.',
+  'ChangeType_Code':'Mã loại biến động.',
+  'Source':'Nguồn (nơi đi / nguồn biến động).',
+  'Destination':'Đích (nơi đến / đích biến động).',
+  'Status':'Trạng thái.',
+  'Die_date':'Ngày chết.',
+  'Go_date':'Ngày chuyển đi.',
+  'Come_date':'Ngày chuyển đến.',
+  'Contra_Date':'Ngày dùng biện pháp tránh thai.',
+  'Contraceptive_Code':'Mã biện pháp tránh thai.',
+  'Contraceptive_Name':'Tên biện pháp tránh thai.',
+  'FPHistory_ID':'Mã lịch sử KHHGD.',
+  'Generate_Code':'Mã (số) phiếu sinh sản.',
+  'Gen_Date':'Ngày ghi nhận sinh sản.',
+  'Deliver':'Nơi / kết quả sinh đẻ.',
+  'Pregnant_Check_Number':'Số lần khám thai.',
+  'Weight1':'Cân nặng lần 1.',
+  'Weight2':'Cân nặng lần 2.',
+  'Weight3':'Cân nặng lần 3.',
+  'Weight4':'Cân nặng lần 4.',
+  'IsTracking':'Có theo dõi hay không.',
+  'IsTracking_SLTS1':'Có theo dõi sau sinh lần 1 hay không.',
+  'IsTracking_SLTS2':'Có theo dõi sau sinh lần 2 hay không.',
+  'Date_SLSS':'Ngày sinh / sau sinh.',
+  'Result_SLSS':'Kết quả sau sinh.',
+  'Date_SLTS1':'Ngày theo dõi sau sinh 1.',
+  'Result_SLTS1':'Kết quả theo dõi sau sinh 1.',
+  'Date_SLTS2':'Ngày theo dõi sau sinh 2.',
+  'Result_SLTS2':'Kết quả theo dõi sau sinh 2.',
+  'Pregnant_Abort_No_Use':'Phá thai / không dùng (có/không).',
+  'Full_Name':'Họ và tên đầy đủ.',
+  'USER_NAME':'Tên đăng nhập.',
+  'PASSWORD':'Mật khẩu (đã mã hóa).',
+  'GROUP_ID':'Mã nhóm quyền.',
+  'GROUP_NAME':'Tên nhóm quyền.',
+  'GROUP_DESC':'Mô tả nhóm quyền.',
+  'FUNC_ID':'Mã chức năng.',
+  'FUNC_NAME':'Tên chức năng.',
+  'FUNC_TYPE':'Loại chức năng.',
+  'MODULE_ID':'Mã module.',
+  'MODULE_NAME':'Tên module.',
+  'ACCESS_ID':'Mã bản ghi phân quyền.',
+  'VIEW':'Quyền Xem.',
+  'UPDATE':'Quyền Sửa.',
+  'DELETE':'Quyền Xóa.',
+  'INSERT':'Quyền Thêm.',
+  'ACCEPT':'Được chấp nhận (dùng để phân quyền).',
+  'ROLE_ID':'Mã vai trò.',
+  'ROLE_TYPE':'Loại vai trò.',
+  'LOG_ID':'Mã log.',
+  'ACC_TIME':'Thời điểm truy cập.',
+  'SERVER_NAME':'Tên máy chủ.',
+  'SYSDB_NAME':'Tên CSDL.',
+  'ACTION_ID':'Mã hành động.',
+  'ACTION_NAME':'Tên hành động.',
+  'Hire_Date':'Ngày tuyển dụng / vào làm.',
+  'IsCadre':'Là cán bộ hay cộng tác viên.',
+  'IsBigHouseHold':'Hộ đông người hay không.',
+  'HouseHold_Status':'Trạng thái hộ.',
+  'IsChecked':'Đã kiểm tra / duyệt chưa.',
+  'Cause_Code':'Mã nguyên nhân biến động.',
+  'Cause_Name':'Tên nguyên nhân biến động.',
+  'ChangeType_Name':'Tên loại biến động.',
+  'IsShow':'Có hiển thị hay không.',
+  'Invalid_Name':'Tên lý do không hợp lệ.',
+  'Marital_Name':'Tên tình trạng hôn nhân.',
+  'Nationality_Name':'Tên quốc tịch.',
+  'Country_Name':'Tên quốc gia.',
+  'Relation_Name':'Tên quan hệ.',
+  'Residence_Name':'Tên tình trạng cư trú.',
+  'Education_Name':'Tên trình độ học vấn.',
+  'Technical_Name':'Tên trình độ kỹ thuật.',
+  'Ethnic_Name':'Tên dân tộc.',
+  'Area':'Diện tích / khu vực.',
+  'Active':'Đang hoạt động hay không.',
+  'Selected':'Đang được chọn hay không.',
+  'Report_ID':'Mã báo cáo.',
+  'RptYear':'Năm báo cáo.',
+  'RptMonth':'Tháng báo cáo.',
+  'RptQuarter':'Quý báo cáo.',
+  'RC_ID':'Mã mẫu báo cáo.',
+  'RC_NAME':'Tên mẫu báo cáo.',
+  'RPT_NAME':'Tên báo cáo.',
+  'PROC_NAME':'Tên thủ tục tạo báo cáo.',
+  'PARAS':'Tham số báo cáo.',
+  'HEADER_L':'Tiêu đề trái.',
+  'HEADER_R':'Tiêu đề phải.',
+  'FOOTER_L':'Chân trang trái.',
+  'FOOTER_R':'Chân trang phải.',
+  'SUBTITLE':'Tiêu đề phụ.',
+  'CAPTION1':'Chú thích 1.',
+  'CAPTION2':'Chú thích 2.',
+  'CAPTION3':'Chú thích 3.',
+  'BatchId':'Mã lô nhập.',
+  'TempId':'Mã tạm.',
+  'PersonalTable':'Bảng nhân khẩu liên quan.',
+  'PersonalKey':'Khóa nhân khẩu.',
+  'OldCccd':'Số CCCD cũ.',
+  'NewCccd':'Số CCCD mới.',
+  'OldBhyt':'Mã BHYT cũ.',
+  'NewBhyt':'Mã BHYT mới.',
+  'CccdChanged':'Có đổi CCCD hay không.',
+  'BhytChanged':'Có đổi BHYT hay không.',
+  'ChangedAt':'Thời điểm thay đổi.',
+  'ChangedBy':'Người thay đổi.',
+  'DetailsJson':'Chi tiết thay đổi (JSON).',
+  'ImportedAt':'Thời điểm nhập.',
+  'FileName':'Tên file nhập.',
+  'SheetName':'Tên sheet.',
+  'ImportedBy':'Người nhập.',
+  'InputCount':'Số dòng đầu vào.',
+  'InsertedCount':'Số dòng thêm mới.',
+  'SkippedCount':'Số dòng bỏ qua.',
+  'ErrorCount':'Số dòng lỗi.',
+  'UpdatedCount':'Số dòng cập nhật.',
+  'CCCD':'Số CCCD (bảng tạm).',
+  'HoTen':'Họ tên (bảng tạm).',
+  'NgaySinh':'Ngày sinh (bảng tạm).',
+  'GioiTinh':'Giới tính (bảng tạm).',
+  'MaXa':'Mã xã (bảng tạm).',
+  'DiaChi':'Địa chỉ (bảng tạm).',
+  'CreatedAt':'Thời điểm tạo.',
+  'CreatedDate':'Ngày tạo.',
+  'ImportRevision':'Phiên bản nhập liệu.',
+  'ID':'Mã định danh (tự tăng).',
+  'ChangeCode_Old':'Mã cũ (để đối chiếu).',
+  'ChangeDesc':'Mô tả thay đổi.',
+  'Region_Old':'Địa bàn cũ.',
+  'KHHGD_Service_Base_Number':'Số cơ sở dịch vụ KHHGD.',
+  'Commune_Medical_Station':'Trạm y tế xã.',
+  'Private_Medical_Base':'Cơ sở y tế tư nhân.',
+  'Province_Hospital':'Bệnh viện tỉnh.',
+  'District_Hospital':'Bệnh viện huyện.',
+  'Area_Hospital':'Bệnh viện khu vực.',
+  'Province_Cadre':'Cán bộ tỉnh.',
+  'Female_Province_Cadre':'Cán bộ nữ tỉnh.',
+  'Contract_Province_Cadre':'Cán bộ hợp đồng tỉnh.',
+  'District_Cadre':'Cán bộ huyện.',
+  'Female_District_Cadre':'Cán bộ nữ huyện.',
+  'Contract_District_Cadre':'Cán bộ hợp đồng huyện.',
+  'Commune_Cadre':'Cán bộ xã.',
+  'Female_Commune_Cadre':'Cán bộ nữ xã.',
+  'Contract_Commune_Cadre':'Cán bộ hợp đồng xã.',
+  'Money_ChildProtection':'Kinh phí bảo vệ trẻ em.',
+  'House_Poor':'Hộ nghèo.',
+  'House_Culture':'Hộ văn hóa.',
+  'House_Law':'Hộ pháp luật.'
+};
+
+function describe(col){
+  if(DESC[col]) return DESC[col];
+  if(/^p\d+$/.test(col)) return 'Ô số liệu báo cáo p1..p76.';
+  if(/^(XBS|HBS|TBS)\d+$/.test(col)) return 'Chỉ tiêu thống kê theo biểu mẫu (XBS/HBS/TBS).';
+  if(/Date/i.test(col)) return 'Ngày / thời gian.';
+  if(/^Is[A-Z]/.test(col)) return 'Đúng / sai (có / không).';
+  if(/Code_Old$/.test(col)) return 'Mã cũ (để đối chiếu).';
+  if(/_Old$/.test(col)) return 'Giá trị cũ (lưu trữ).';
+  if(/_Name$/.test(col)) return 'Tên (gọi tên).';
+  if(/_ID$/.test(col)) return 'Mã khóa (khóa ngoại tham chiếu bảng liên quan).';
+  if(/_Code$/.test(col)) return 'Mã danh mục.';
+  if(/_Number$/.test(col)) return 'Số / số lượng.';
+  if(/_Status$/.test(col)) return 'Trạng thái.';
+  if(/^Total_/.test(col)) return 'Tổng số.';
+  if(/^(Expense|Spend|Investment|Money)/.test(col)) return 'Chi phí / kinh phí.';
+  return 'Cột ' + col + '.';
+}
+
+// ---- doc schema ----
+const tables = [];
+const index = {};
+for(const line of SCHEMA.split('\n')){
+  const s = line.replace(/\r$/,'').trim();
+  if(!s) continue;
+  const p = s.split('|');
+  const t = p[0], c = p[1], pk = (p[2]||'') === 'PK', ty = p[3]||'';
+  if(!index[t]){ index[t] = []; tables.push(t); }
+  index[t].push({c, pk, ty});
+}
+const fkSet = {};
+for(const r of RELS){ fkSet[r[0] + '.' + r[2]] = true; }
+
+// ---- build mermaid ----
+let def = 'erDiagram\n';
+for(const r of RELS){ def += '  ' + r[1] + ' ||--o{ ' + r[0] + ' : "' + r[2] + '"\n'; }
+for(const t of tables){
+  def += '  ' + t + ' {\n';
+  for(const col of index[t]){
+    const ty = (col.ty || 'string').toLowerCase();
+    let key = '';
+    if(col.pk) key = 'PK';
+    else if(fkSet[t + '.' + col.c]) key = 'FK';
+    def += '    ' + ty + ' ' + col.c + (key ? ' ' + key : '') + '\n';
+  }
+  def += '  }\n';
+}
+document.getElementById('mmd').textContent = def;
+
+// ---- col index ----
+var colIndex = {};
+(function(){
+  for(var t of tables){
+    for(var col of index[t]){
+      var key = col.c;
+      if(!colIndex[key]) colIndex[key] = {tables:[], ty:col.ty, pk:false, fk:false};
+      if(colIndex[key].tables.indexOf(t) < 0) colIndex[key].tables.push(t);
+      if(col.pk) colIndex[key].pk = true;
+      if(fkSet[t + '.' + col.c]) colIndex[key].fk = true;
+    }
+  }
+})();
+function colOf(name){ return colIndex[name] || null; }
+var tableSet = {}; for(var tt of tables) tableSet[tt.toLowerCase()] = tt;
+
+// ---- zoom / pan ----
+var scale = 1.6, tx = 20, ty = 20;
+var inner = document.getElementById('inner');
+var stage = document.getElementById('stage');
+var zv = document.getElementById('zoomv');
+function apply(){ inner.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')'; zv.textContent = Math.round(scale*100)+'%'; }
+document.getElementById('plus').onclick = function(){ scale=Math.min(scale+0.2,8); apply(); };
+document.getElementById('minus').onclick = function(){ scale=Math.max(scale-0.2,0.15); apply(); };
+document.getElementById('reset').onclick = function(){ scale=1.6; tx=20; ty=20; apply(); };
+document.getElementById('fit').onclick = function(){
+  var svg = document.querySelector('#inner svg');
+  if(!svg) return;
+  var r = svg.getBoundingClientRect();
+  var s = Math.min((window.innerWidth-40)/r.width, (window.innerHeight-80)/r.height);
+  scale = s; tx = 20; ty = 20; apply(); setTimeout(apply,50);
+};
+stage.addEventListener('wheel', function(e){
+  e.preventDefault();
+  var rect = stage.getBoundingClientRect();
+  var mx = e.clientX-rect.left, my = e.clientY-rect.top, old = scale;
+  scale = Math.min(Math.max(scale*(e.deltaY<0?1.12:1/1.12),0.15),8);
+  tx = mx-(mx-tx)*(scale/old); ty = my-(my-ty)*(scale/old); apply();
+},{passive:false});
+var drag=false,lx=0,ly=0;
+stage.addEventListener('mousedown', function(e){ if(e.button!==0) return; drag=true; lx=e.clientX; ly=e.clientY; stage.classList.add('drag'); });
+window.addEventListener('mouseup', function(){ drag=false; stage.classList.remove('drag'); });
+window.addEventListener('mousemove', function(e){ if(!drag) return; tx+=e.clientX-lx; ty+=e.clientY-ly; lx=e.clientX; ly=e.clientY; apply(); });
+
+// ---- tooltip ----
+var tip = document.getElementById('tip');
+function showTip(html, x, y){
+  tip.innerHTML = html; tip.style.display='block';
+  var w = tip.offsetWidth, h = tip.offsetHeight;
+  var nx = x + 16, ny = y + 16;
+  if(nx + w > window.innerWidth) nx = x - w - 16;
+  if(ny + h > window.innerHeight) ny = y - h - 16;
+  tip.style.left = Math.max(6,nx)+'px'; tip.style.top = Math.max(6,ny)+'px';
+}
+function hideTip(){ tip.style.display='none'; }
+function onMove(e){
+  var el = e.target;
+  if(el && el.tagName && el.tagName.toLowerCase()==='text'){
+    var txt = (el.textContent||'').trim();
+    var toks = txt.split(/\s+/);
+    var col=null, tbl=null;
+    for(var tok of toks){
+      if(colOf(tok)){ col = tok; }
+      else if(tableSet[tok.toLowerCase()]){ tbl = tableSet[tok.toLowerCase()]; }
+    }
+    if(col){
+      var info = colOf(col);
+      var badges = '';
+      if(info.pk) badges += '<span class="badge text-bg-warning text-dark">PK</span>';
+      if(info.fk) badges += '<span class="badge text-bg-info text-dark">FK</span>';
+      showTip('<div class="col-name">'+col+'</div><div class="sub">'+info.tables.join(', ')+' &middot; '+info.ty+'</div>'+badges+'<div class="mt-1">'+describe(col)+'</div>', e.clientX, e.clientY);
+      el.style.fill = '#c0392b'; el.style.fontWeight='bold';
+      return;
+    }
+    if(tbl){
+      showTip('<div class="col-name">'+tbl+'</div><div class="sub">Bảng</div><div class="mt-1">'+(TDESC[tbl]||('Bảng '+tbl+'.'))+'</div>', e.clientX, e.clientY);
+      el.style.fill = '#c0392b'; el.style.fontWeight='bold';
+      return;
+    }
+  }
+  hideTip();
+}
+function onOut(e){
+  var el = e.target;
+  if(el && el.tagName && el.tagName.toLowerCase()==='text'){ el.style.fill=''; el.style.fontWeight=''; }
+}
+stage.addEventListener('mousemove', onMove);
+stage.addEventListener('mouseout', onOut);
+
+mermaid.initialize({startOnLoad:false, theme:'default', maxTextSize:2000000, maxEdges:2000, er:{useMaxWidth:false}});
+window.addEventListener('load', function(){
+  mermaid.run({querySelector:'#mmd'}).then(function(){ setTimeout(apply, 400); }).catch(function(err){ console.error(err); });
+});
+</script>
+</body>
+</html>

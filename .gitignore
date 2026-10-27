@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.env
+.env.local
+*.log
+npm-debug.log*
+.DS_Store
+.vscode/
+severIPSQL.txt
+test-db.mjs
+
+# Dữ liệu xác nhận rà soát Excel (sinh ra khi chạy)
+server/data/
+.tmp-*
+~$*.xlsx

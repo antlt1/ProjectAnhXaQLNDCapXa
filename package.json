@@ -1,0 +1,23 @@
+{
+  "name": "project-anh-xa-qlnd-cap-xa",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Tra cứu hộ gia đình, nhân khẩu và tình trạng ánh xạ CCCD/BHYT (NHONAI)",
+  "workspaces": [
+    "server",
+    "web"
+  ],
+  "scripts": {
+    "dev": "concurrently -n api,web -c cyan,magenta \"npm run dev --workspace server\" \"npm run dev --workspace web\"",
+    "dev:demo": "concurrently -n api,web -c yellow,magenta \"npm run dev:demo --workspace server\" \"npm run dev --workspace web\"",
+    "build": "npm run build --workspace web",
+    "start": "npm run start --workspace server",
+    "typecheck": "npm run typecheck --workspace web"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
