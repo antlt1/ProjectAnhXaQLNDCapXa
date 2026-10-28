@@ -2,11 +2,13 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { api } from '../api';
 import type {
   ReconcileComparison,
+  ReconcileFieldKey,
   ReconcileFilter,
   ReconcileIssue,
   ReconcileItem,
   ReconcilePerson,
   ReconcileResponse,
+  ReconcileSource,
   ReconcileStatus,
   ReconcileTotals,
 } from '../types';
@@ -47,6 +49,22 @@ const FILTERS: { value: ReconcileFilter; label: string }[] = [
 ];
 
 const ISSUE_ORDER: ReconcileIssue[] = ['name', 'dob', 'address', 'sex'];
+
+const DEFAULT_SOURCES: Record<ReconcileFieldKey, ReconcileSource> = {
+  name: 'db',
+  dob: 'excel',
+  sex: 'db',
+  cccd: 'excel',
+  address: 'db',
+};
+
+interface SourceField {
+  key: ReconcileFieldKey;
+  label: string;
+  excel: string;
+  db: string;
+  note?: string;
+}
 
 function detailStatus(
   excelCccd: string,
@@ -296,8 +314,9 @@ export function ReconcileView() {
 
   const [selected, setSelected] = useState<ReconcileItem | null>(null);
   const [selectedPersonalId, setSelectedPersonalId] = useState<number | null>(null);
-  const [acceptDob, setAcceptDob] = useState(false);
-  const [acceptAddress, setAcceptAddress] = useState(false);
+  const [sourceOverrides, setSourceOverrides] = useState<
+    Partial<Record<ReconcileFieldKey, ReconcileSource>>
+  >({});
   const [note, setNote] = useState('');
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
@@ -348,8 +367,7 @@ export function ReconcileView() {
   useEffect(() => {
     if (!selected) return;
     setSelectedPersonalId(selected.confirmation?.personalId ?? selected.db?.personalId ?? null);
-    setAcceptDob(Boolean(selected.confirmation?.acceptDobDiff));
-    setAcceptAddress(Boolean(selected.confirmation?.acceptAddressDiff));
+    setSourceOverrides({ ...(selected.confirmation?.sources ?? {}) });
     setNote(selected.confirmation?.note ?? '');
     setSaveError('');
   }, [selected?.key, selected?.confirmation?.updatedAt]);
@@ -371,6 +389,64 @@ export function ReconcileView() {
     [selected, chosenPerson],
   );
 
+  const sourceFields = useMemo<SourceField[]>(() => {
+    if (!selected || !chosenPerson) return [];
+    const fields: SourceField[] = [];
+
+    if (comparison && !comparison.name.same) {
+      fields.push({
+        key: 'name',
+        label: 'Họ và tên',
+        excel: selected.excel.fullName,
+        db: chosenPerson.fullName,
+      });
+    }
+
+    if (comparison?.dob?.issue) {
+      fields.push({
+        key: 'dob',
+        label: 'Ngày sinh',
+        excel: selected.excel.dobDisplay ?? '—',
+        db: chosenPerson.dobDisplay ?? '—',
+        note: comparison.dob.label,
+      });
+    }
+
+    if (comparison && !comparison.sex.same) {
+      fields.push({
+        key: 'sex',
+        label: 'Giới tính',
+        excel: comparison.sex.excel ?? '—',
+        db: comparison.sex.db ?? '—',
+      });
+    }
+
+    if (selected.excel.cccd && chosenPerson.cccd !== selected.excel.cccd) {
+      fields.push({
+        key: 'cccd',
+        label: 'Số CCCD',
+        excel: selected.excel.cccd,
+        db: chosenPerson.cccd ?? 'Chưa có',
+        note:
+          chosenPerson.cccdOld === selected.excel.cccd
+            ? `Trùng CCCD cũ (${chosenPerson.cccdOld})`
+            : undefined,
+      });
+    }
+
+    if (comparison && !comparison.address.same && !comparison.address.missing) {
+      fields.push({
+        key: 'address',
+        label: 'Ấp / địa chỉ',
+        excel: comparison.address.excel || '—',
+        db: comparison.address.db || '—',
+        note: 'Chỉ ghi nhận lựa chọn, không cập nhật địa chỉ',
+      });
+    }
+
+    return fields;
+  }, [selected, chosenPerson, comparison]);
+
   const status = selected
     ? detailStatus(selected.excel.cccd, chosenPerson, comparison)
     : 'not-found';
@@ -390,13 +466,21 @@ export function ReconcileView() {
     setSaveError('');
     setSaveNotice('');
 
+    const sources: Partial<Record<ReconcileFieldKey, ReconcileSource>> = {};
+    if (confirmed) {
+      for (const field of sourceFields) {
+        sources[field.key] = sourceOverrides[field.key] ?? DEFAULT_SOURCES[field.key];
+      }
+    }
+
     try {
       await api.confirmReconcile({
         stt: selected.stt,
         cccd: selected.excel.cccd,
         confirmed,
-        acceptDobDiff: confirmed ? acceptDob : false,
-        acceptAddressDiff: confirmed ? acceptAddress : false,
+        acceptDobDiff: Boolean(sources.dob),
+        acceptAddressDiff: Boolean(sources.address),
+        sources,
         personalId: confirmed ? chosenPerson?.personalId ?? null : null,
         note: confirmed ? note : '',
       });
@@ -404,8 +488,7 @@ export function ReconcileView() {
       if (confirmed) {
         setSaveNotice('Đã lưu xác nhận.');
       } else {
-        setAcceptDob(false);
-        setAcceptAddress(false);
+        setSourceOverrides({});
         setNote('');
         setSaveNotice('Đã bỏ xác nhận.');
       }
@@ -619,6 +702,7 @@ export function ReconcileView() {
                 <tr>
                   <th className="align-center">STT</th>
                   <th>Họ tên / CCCD</th>
+                  <th>Ngày sinh</th>
                   <th>Ấp</th>
                   <th>Kết quả</th>
                 </tr>
@@ -626,7 +710,7 @@ export function ReconcileView() {
               <tbody>
                 {loading && !data && (
                   <tr className="skeleton-row">
-                    <td colSpan={4}>
+                    <td colSpan={5}>
                       <span className="skeleton skeleton-block" />
                     </td>
                   </tr>
@@ -671,6 +755,16 @@ export function ReconcileView() {
                               </span>
                             )}
                           </span>
+                        </div>
+                      </td>
+                      <td>
+                        <div className="reconcile-dob-cell">
+                          <span className="mono">{item.excel.dobDisplay ?? '—'}</span>
+                          {item.issues.includes('dob') && (
+                            <span className="person-sub dob-db">
+                              CSDL: <span className="mono">{item.db?.dobDisplay ?? '—'}</span>
+                            </span>
+                          )}
                         </div>
                       </td>
                       <td>
@@ -852,41 +946,68 @@ export function ReconcileView() {
                   )}
                 </div>
 
-                <div className="confirm-checks">
-                  <label className="check-field">
-                    <input
-                      type="checkbox"
-                      checked={acceptDob}
-                      onChange={(event) => setAcceptDob(event.target.checked)}
-                    />
-                    <span>
-                      Chấp nhận lệch năm sinh
-                      {comparison?.dob?.issue && (
-                        <em>
-                          {' '}
-                          ({Math.abs(comparison.dob.yearDiff ?? 0)} năm)
-                        </em>
-                      )}
-                    </span>
-                  </label>
+                {sourceFields.length > 0 ? (
+                  <div className="source-panel">
+                    <div className="source-panel-head">
+                      <h4>Nguồn dữ liệu đúng</h4>
+                      <p className="muted-small">
+                        Trường nào lệch thì chọn bên đúng: <strong>Theo Excel</strong> là cần lấy
+                        giá trị trong file, <strong>Theo CSDL</strong> là giữ nguyên trong SQL
+                        Server.
+                      </p>
+                    </div>
 
-                  <label className="check-field">
-                    <input
-                      type="checkbox"
-                      checked={acceptAddress}
-                      onChange={(event) => setAcceptAddress(event.target.checked)}
-                    />
-                    <span>
-                      Chấp nhận lệch địa chỉ
-                      {comparison?.address && !comparison.address.same && (
-                        <em>
-                          {' '}
-                          ({comparison.address.excel || '—'} → {comparison.address.db || '—'})
-                        </em>
-                      )}
-                    </span>
-                  </label>
-                </div>
+                    {sourceFields.map((field) => {
+                      const value = sourceOverrides[field.key] ?? DEFAULT_SOURCES[field.key];
+
+                      return (
+                        <div key={field.key} className="source-row">
+                          <div className="source-field">
+                            <span className="source-label">{field.label}</span>
+                            {field.note && <span className="source-note">{field.note}</span>}
+                          </div>
+
+                          <div className="source-values">
+                            <span
+                              className={`source-value ${value === 'excel' ? 'is-chosen' : ''}`}
+                            >
+                              <em>Excel</em>
+                              <span className="mono">{field.excel}</span>
+                            </span>
+                            <span className={`source-value ${value === 'db' ? 'is-chosen' : ''}`}>
+                              <em>CSDL</em>
+                              <span className="mono">{field.db}</span>
+                            </span>
+                          </div>
+
+                          <select
+                            className={`source-select source-${value}`}
+                            value={value}
+                            onChange={(event) =>
+                              setSourceOverrides((current) => ({
+                                ...current,
+                                [field.key]: event.target.value as ReconcileSource,
+                              }))
+                            }
+                            aria-label={`Nguồn dữ liệu đúng cho ${field.label}`}
+                          >
+                            <option value="excel">Theo Excel</option>
+                            <option value="db">Theo CSDL</option>
+                          </select>
+                        </div>
+                      );
+                    })}
+
+                    <p className="source-hint">
+                      <InfoIcon size={13} />
+                      Lựa chọn nguồn được lưu kèm xác nhận, chưa ghi vào SQL Server.
+                    </p>
+                  </div>
+                ) : (
+                  <p className="muted-small source-empty">
+                    Không có trường nào lệch với nhân khẩu đang chọn — chỉ cần xác nhận.
+                  </p>
+                )}
 
                 <label className="note-field">
                   <span>Ghi chú</span>
@@ -950,9 +1071,10 @@ export function ReconcileView() {
 
       <p className="page-note">
         <InfoIcon size={15} />
-        Dò theo số CCCD trước; nếu chưa có thì dò theo họ tên trong CSDL. Hai ô tích “Chấp nhận
-        lệch” chỉ ghi nhận ngoại lệ đã kiểm tra, không sửa dữ liệu trong SQL Server. Xác nhận được
-        lưu tại <code>server/data/reconcile-confirmations.json</code>.
+        Dò theo số CCCD trước; nếu chưa có thì dò theo họ tên trong CSDL. Với trường lệch, chọn
+        nguồn đúng <strong>Theo Excel</strong> hoặc <strong>Theo CSDL</strong> — lựa chọn chỉ được
+        ghi nhận cùng xác nhận, không sửa dữ liệu trong SQL Server. Xác nhận được lưu tại{' '}
+        <code>server/data/reconcile-confirmations.json</code>.
       </p>
 
       {showHouseholdId !== null && (

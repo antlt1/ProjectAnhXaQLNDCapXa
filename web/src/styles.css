@@ -2100,10 +2100,14 @@ code {
 }
 
 .reconcile-table th:nth-child(3) {
-  width: 112px;
+  width: 120px;
 }
 
 .reconcile-table th:nth-child(4) {
+  width: 112px;
+}
+
+.reconcile-table th:nth-child(5) {
   width: 138px;
 }
 
@@ -2129,6 +2133,22 @@ code {
   flex-direction: column;
   gap: 1px;
   min-width: 0;
+}
+
+.reconcile-dob-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.reconcile-dob-cell .dob-db {
+  display: block;
+  color: var(--warning);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
 .reconcile-name-cell .person-name {
@@ -2427,35 +2447,125 @@ code {
   margin: 2px 0 0;
 }
 
-.confirm-checks {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+.source-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 9px 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #ffffff;
 }
 
-.check-field {
+.source-panel-head h4 {
+  margin: 0;
+  font-size: 12.5px;
+}
+
+.source-panel-head p {
+  margin: 2px 0 0;
+}
+
+.source-row {
+  display: grid;
+  grid-template-columns: minmax(92px, 126px) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+}
+
+.source-row + .source-row {
+  border-top: 1px solid #eef3f9;
+}
+
+.source-field {
   display: flex;
-  align-items: flex-start;
-  gap: 7px;
-  padding: 7px 9px;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.source-label {
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.source-note {
+  color: var(--warning);
+  font-size: 10.5px;
+  font-weight: 600;
+}
+
+.source-values {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.source-value {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  min-width: 0;
+  padding: 3px 7px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 11.5px;
+}
+
+.source-value em {
+  color: var(--muted);
+  font-size: 9.5px;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.source-value.is-chosen {
+  border-color: #86b7fe;
+  background: #eaf2ff;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.source-value.is-chosen em {
+  color: var(--primary);
+}
+
+.source-select {
+  height: 30px;
+  padding: 0 6px;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 7px;
   background: #ffffff;
   color: var(--ink-soft);
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 600;
   cursor: pointer;
 }
 
-.check-field input {
-  margin-top: 2px;
-  accent-color: var(--primary);
+.source-select.source-excel {
+  border-color: #86b7fe;
+  color: var(--primary);
 }
 
-.check-field em {
-  color: var(--warning);
-  font-style: normal;
-  font-weight: 600;
+.source-hint {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 10.5px;
+}
+
+.source-empty {
+  margin: 0;
 }
 
 .note-field {
@@ -2502,12 +2612,12 @@ code {
 }
 
 @media (max-width: 1200px) {
-  .reconcile-table th:nth-child(3),
-  .reconcile-table td:nth-child(3) {
+  .reconcile-table th:nth-child(4),
+  .reconcile-table td:nth-child(4) {
     display: none;
   }
 
-  .reconcile-table th:nth-child(4) {
+  .reconcile-table th:nth-child(5) {
     width: 132px;
   }
 }
@@ -2522,7 +2632,7 @@ code {
     max-height: none;
   }
 
-  .confirm-checks,
+  .source-row,
   .household-grid {
     grid-template-columns: minmax(0, 1fr);
   }

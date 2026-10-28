@@ -3,6 +3,21 @@ import path from 'node:path';
 
 const FILE_NAME = 'reconcile-confirmations.json';
 
+export const FIELD_KEYS = ['name', 'dob', 'sex', 'cccd', 'address'];
+const SOURCE_VALUES = new Set(['excel', 'db']);
+
+function normalizeSources(input) {
+  const raw = input && typeof input === 'object' ? input : null;
+  const sources = {};
+  if (!raw) return sources;
+
+  for (const key of FIELD_KEYS) {
+    const value = raw[key];
+    if (SOURCE_VALUES.has(value)) sources[key] = value;
+  }
+  return sources;
+}
+
 function normalizeRecord(input) {
   const stt = Number(input?.stt);
   if (!Number.isInteger(stt) || stt <= 0) {
@@ -15,13 +30,19 @@ function normalizeRecord(input) {
   const note = String(input?.note ?? '').trim().slice(0, 500);
   const personalIdRaw = Number(input?.personalId);
   const personalId = Number.isInteger(personalIdRaw) && personalIdRaw > 0 ? personalIdRaw : null;
+  const sources = normalizeSources(input?.sources);
+  const hasSources = Object.keys(sources).length > 0;
 
   return {
     stt,
     cccd,
     confirmed: Boolean(input?.confirmed),
-    acceptDobDiff: Boolean(input?.acceptDobDiff),
-    acceptAddressDiff: Boolean(input?.acceptAddressDiff),
+    // Nguồn đã chọn thay cho cờ "chấp nhận lệch" cũ; vẫn giữ cờ để đọc dữ liệu cũ.
+    sources,
+    acceptDobDiff: hasSources ? Boolean(sources.dob) : Boolean(input?.acceptDobDiff),
+    acceptAddressDiff: hasSources
+      ? Boolean(sources.address)
+      : Boolean(input?.acceptAddressDiff),
     personalId,
     note,
     updatedAt: new Date().toISOString(),
@@ -81,6 +102,7 @@ export class ConfirmationStore {
         !record.confirmed &&
         !record.acceptDobDiff &&
         !record.acceptAddressDiff &&
+        Object.keys(record.sources).length === 0 &&
         !record.note &&
         !record.personalId;
 

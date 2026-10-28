@@ -6,8 +6,10 @@ import type {
   LogsResponse,
   PersonalLogsResponse,
   ReconcileConfirmResponse,
+  ReconcileFieldKey,
   ReconcileFilter,
   ReconcileResponse,
+  ReconcileSource,
   Stats,
 } from './types';
 
@@ -80,6 +82,7 @@ export interface ReconcileConfirmInput {
   confirmed: boolean;
   acceptDobDiff?: boolean;
   acceptAddressDiff?: boolean;
+  sources?: Partial<Record<ReconcileFieldKey, ReconcileSource>>;
   personalId?: number | null;
   note?: string;
 }

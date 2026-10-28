@@ -192,6 +192,7 @@ app.post(
       confirmed: asBool(body.confirmed),
       acceptDobDiff: asBool(body.acceptDobDiff),
       acceptAddressDiff: asBool(body.acceptAddressDiff),
+      sources: body.sources,
       personalId: asInt(body.personalId),
       note: asString(body.note, 500),
     });

@@ -1,5 +1,5 @@
 import { config } from '../config.js';
-import { ConfirmationStore } from './confirmations.js';
+import { ConfirmationStore, FIELD_KEYS } from './confirmations.js';
 import {
   loadExcelRows,
   normalizeHamlet,
@@ -394,6 +394,20 @@ function itemToRow(excel, matched) {
   };
 }
 
+function confirmationSources(record) {
+  const sources = {};
+  const raw = record?.sources;
+  if (raw && typeof raw === 'object') {
+    for (const key of FIELD_KEYS) {
+      if (raw[key] === 'excel' || raw[key] === 'db') sources[key] = raw[key];
+    }
+  }
+  // Hồ sơ cũ chỉ có cờ "chấp nhận lệch": hiểu là giữ nguyên giá trị trong CSDL.
+  if (!sources.dob && record?.acceptDobDiff) sources.dob = 'db';
+  if (!sources.address && record?.acceptAddressDiff) sources.address = 'db';
+  return sources;
+}
+
 function matchesIssue(row, issue, confirmation) {
   if (!issue || issue === 'all') return true;
   if (issue === 'confirmed') return Boolean(confirmation?.confirmed);
@@ -566,6 +580,7 @@ export class ReconcileService {
               confirmed: Boolean(confirmation.confirmed),
               acceptDobDiff: Boolean(confirmation.acceptDobDiff),
               acceptAddressDiff: Boolean(confirmation.acceptAddressDiff),
+              sources: confirmationSources(confirmation),
               personalId: confirmation.personalId ?? null,
               note: confirmation.note ?? '',
               updatedAt: confirmation.updatedAt ?? null,

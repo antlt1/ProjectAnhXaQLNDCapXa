@@ -212,10 +212,15 @@ export interface ReconcileExcelRow {
   cccd: string;
 }
 
+export type ReconcileFieldKey = 'name' | 'dob' | 'sex' | 'cccd' | 'address';
+
+export type ReconcileSource = 'excel' | 'db';
+
 export interface ReconcileConfirmation {
   confirmed: boolean;
   acceptDobDiff: boolean;
   acceptAddressDiff: boolean;
+  sources: Partial<Record<ReconcileFieldKey, ReconcileSource>>;
   personalId: number | null;
   note: string;
   updatedAt: string | null;
